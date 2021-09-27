@@ -25,7 +25,6 @@ _SL_REGEX_STR = ('https://slideslive\\.(?:com|de)/'
                  '/*'
                  '(?P<name>.*)')
 SL_REGEX = re.compile(_SL_REGEX_STR)
-SL_TOKEN =  'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MzI3NDA2MTUsImlwIjoiNDUuNjIuMTIzLjIxNSIsInUiOm51bGwsInAiOjM4OTU2MjYzLCJtIjoxMjQzMTd9.29QcKVSaWErPmwEN0rQ46W-MwndxRs8M8s_mSZQ36_g'
 # SL INFO JSON
 SL_INFO = 'https://ben.slideslive.com/player/{id}?player_token={token}'
 SL_HTML = "https://slideslive.com/{id}"
@@ -168,14 +167,12 @@ def get_urls(video_id, slide_meta, slide_type='big',
     
     
     if 'slide_qualities' in slide_meta:
-        print("slide_qualities", slide_meta['slide_qualities'])
         if slide_type not in slide_meta['slide_qualities']:
             raise ValueError('The slide type (slide_type) is not recognised.')
 
     slides = []
     
     if slide_given:
-        print("slide_given", len(slide_meta['slides']))
         
         lower_bound = -float('inf') if slide[0] is None else slide[0]
         upper_bound = float('inf') if slide[1] is None else slide[1]
@@ -187,7 +184,6 @@ def get_urls(video_id, slide_meta, slide_type='big',
                     slide_type=slide_type,
                     slide_id=s['image']['name']))
     elif time_given:
-        print("time_given")
         lower_bound = -float('inf') if time[0] is None else time[0]
         upper_bound = float('inf') if time[1] is None else time[1]
         s = slide_meta['slides']
@@ -221,12 +217,10 @@ def get_urls(video_id, slide_meta, slide_type='big',
                     slide_type=slide_type,
                     slide_id=s[i + 1]['image']['name']))
     else:
-        print("......")
         slides = [SL_CDN.format(video_id=video_id,
                                 slide_type=slide_type,
                                 slide_id=s['image']['name'])
                   for s in slide_meta['slides']]
-    print(len(slides))
     return slides
 
 # Cell
@@ -261,7 +255,6 @@ def download_slides(url_list, sleep_time=.2, jobs=16,
         slides_dir = os.path.join(os.getcwd(), 'slides')
     else:
         slides_dir = directory
-    print(slides_dir)
     if os.path.exists(slides_dir):
         if not os.path.isdir(slides_dir):
             raise RuntimeError(
@@ -271,9 +264,7 @@ def download_slides(url_list, sleep_time=.2, jobs=16,
         os.mkdir(slides_dir)
 
     if technique in ('python', 'wget'):
-        print("use wget")
         for url in url_list:
-            print(url)
             fn = os.path.basename(url)
             fn_path = os.path.join(slides_dir, fn)
 
@@ -502,7 +493,6 @@ class SlidesLive():
         self.video_id, self.video_name = url2id(video_url)
         self.video_description = get_sl_info(self.video_id)
         
-        #print(self.video_description)
         if 'slides_json_url' in self.video_description:
             meta = get_slide_metadata(
                 self.video_description['slides_json_url'], approach='json')
@@ -510,7 +500,6 @@ class SlidesLive():
             meta = get_slide_metadata(
                 self.video_description['slides_xml_url'], approach='xml')
         self.video_metadata = meta
-        print(len(meta))
     def get_slide_urls(self, slide_type='big', slide=None, time=None):
         """Returns a list of slide URLs -- see `get_urls` for more details."""
         if self.slide is None and slide is None:
@@ -545,7 +534,6 @@ class SlidesLive():
 
         url_list = self.get_slide_urls(slide_type=slide_type,
                                        slide=slide, time=time)
-        print("url list len:", len(url_list))
         download_slides(url_list, sleep_time=sleep_time, jobs=jobs,
                        directory=self.slides_dir, technique=technique)
 
